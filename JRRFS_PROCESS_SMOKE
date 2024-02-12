@@ -112,7 +112,7 @@ smokeFile=SMOKE_RRFS_data_${YYYYMMDDHH}00.nc
 for i in $(seq 0 $(($nfiles - 1)) )
 do
    timestr=`date +%Y%m%d%H -d "$previous_day + $i hours"`
-   intp_fname=${PREDEF_GRID_NAME}_intp_${timestr}00_${timestr}00.nc
+   intp_fname=${PREDEF_GRID_NAME}_intp_${timestr}00_${timestr}59.nc
    if  [ -f ${rave_nwges_dir}/${intp_fname} ]; then
       ${LN} -sf ${rave_nwges_dir}/${intp_fname} ${workdir}/${intp_fname}
       echo "${rave_nwges_dir}/${intp_fname} interoplated file available to reuse"
@@ -140,7 +140,18 @@ export err=$?; err_chk
 
 #Copy the the hourly, interpolated RAVE data to $rave_nwges_dir so it
 # is maintained there for future cycles.
-cp ${workdir}/* ${rave_nwges_dir}
+for file in ${workdir}/*; do
+   filename=$(basename "$file")
+   if [ ! -f ${rave_nwges_dir}/${filename} ]; then
+      cp ${file} ${rave_nwges_dir}
+      echo "Copied missing file: $filename" 
+   fi
+done
+
+echo "Copy RAVE interpolated files completed"
+
+
+#cp ${workdir}/* ${rave_nwges_dir}
 #
 #-----------------------------------------------------------------------
 #
@@ -161,4 +172,3 @@ In directory:    \"${scrfunc_dir}\"
 #-----------------------------------------------------------------------
 #
 { restore_shell_opts; } > /dev/null 2>&1
-
